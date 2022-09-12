@@ -1,0 +1,3 @@
+(sym_lib_table
+  (lib (name "discharger")(type "KiCad")(uri "${KIPRJMOD}/discharger.kicad_sym")(options "")(descr ""))
+)
