@@ -1,0 +1,3 @@
+(fp_lib_table
+  (lib (name "discharger")(type "KiCad")(uri "${KIPRJMOD}/discharger.pretty")(options "")(descr ""))
+)
