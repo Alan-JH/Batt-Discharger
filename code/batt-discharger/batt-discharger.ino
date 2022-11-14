@@ -6,13 +6,28 @@
 float volt;
 int cellCount;
 volatile bool running;
+float vdd;
 
 void toggleRun(){
   running = !running;
 }
 
+void measureVdd(){
+  analogReference(VDD);
+  VREF.CTRLA = VREF_ADC0REFSEL_1V5_gc;
+  // there is a settling time between when reference is turned on, and when it becomes valid.
+  // since the reference is normally turned on only when it is requested, this virtually guarantees
+  // that the first reading will be garbage; subsequent readings taken immediately after will be fine.
+  // VREF.CTRLB|=VREF_ADC0REFEN_bm;
+  // delay(10);
+  uint16_t reading = analogRead(ADC_INTREF);
+  reading = analogRead(ADC_INTREF);
+  uint32_t intermediate = 1023UL * 1500;
+  vdd = intermediate / (1000.0 * reading);
+}
+
 void updateVoltage(){
-  volt = 11 * analogRead(V_ADC_PIN) * 5.0 / 1024; // ATTiny1604 has 10 bit ADC
+  volt = 11 * analogRead(V_ADC_PIN) * vdd / 1024; // ATTiny1604 has 10 bit ADC
 }
 
 void updateCellCount(){
@@ -34,7 +49,9 @@ void setup(){
   digitalWrite(HS_FET, LOW);
   digitalWrite(LS_FET, LOW);
   pinMode(BUTTON_PIN, INPUT_PULLUP);
-  Serial.println("Initialized");
+  measureVdd();
+  Serial.print("Initialized, Measured Vdd: ");
+  Serial.println(vdd);
   updateCellCount();
   if (cellCount == -1){
     Serial.println("Invalid Cell Count, Aborting...");
