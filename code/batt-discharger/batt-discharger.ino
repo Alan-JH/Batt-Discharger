@@ -5,11 +5,15 @@
 
 float volt;
 int cellCount;
-volatile bool running;
+volatile bool runnin;
 float vdd;
+long lastbuttonpress;
 
 void toggleRun(){
-  running = !running;
+  if (millis() - lastbuttonpress > 500){
+    runnin = !runnin;
+    lastbuttonpress = millis();
+  }
 }
 
 void measureVdd(){
@@ -53,9 +57,10 @@ void setup(){
   Serial.print("Initialized, Measured Vdd: ");
   Serial.println(vdd);
   updateCellCount();
-  if (cellCount == -1){
-    Serial.println("Invalid Cell Count, Aborting...");
-    while (1);
+  while (cellCount == -1){
+    Serial.println("Invalid Cell Count, Connect 6S or 4S battery...");
+    delay(1000);
+    updateCellCount();
   }
   Serial.print("Cell Count: ");
   Serial.println(cellCount);
@@ -64,9 +69,9 @@ void setup(){
 
 void loop(){
   updateVoltage();
-  if (running){
+  if (runnin){
     if (volt < 3.8*cellCount)
-      running = false;
+      runnin = false;
     else{
       digitalWrite(HS_FET, HIGH);
       digitalWrite(LS_FET, HIGH);
